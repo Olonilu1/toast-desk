@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,19 +24,20 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var apiKey: EditText
     private lateinit var btnSave: Button
     private lateinit var btnTest: Button
+    private lateinit var btnBrowse: Button
     private lateinit var progress: ProgressBar
     private lateinit var status: TextView
 
     private val PROVIDERS = arrayOf(
-        "xAI (Grok)",
         "OpenRouter",
+        "xAI (Grok)",
         "OpenAI",
         "Gemini (Google)",
         "Custom (OpenAI-compatible)")
 
     private val DEFAULTS = mapOf(
         "xAI (Grok)" to Pair("https://api.x.ai/v1", "grok-4"),
-        "OpenRouter" to Pair("https://openrouter.ai/api/v1", "openrouter/auto"),
+        "OpenRouter" to Pair("https://openrouter.ai/api/v1", "nvidia/nemotron-3.5-lightning:free"),
         "OpenAI" to Pair("https://api.openai.com/v1", "gpt-4o-mini"),
         "Gemini (Google)" to Pair("https://generativelanguage.googleapis.com/v1beta", "gemini-2.0-flash"),
         "Custom (OpenAI-compatible)" to Pair("", ""))
@@ -52,6 +54,7 @@ class SettingsActivity : AppCompatActivity() {
         apiKey = findViewById(R.id.apiKey)
         btnSave = findViewById(R.id.btnSave)
         btnTest = findViewById(R.id.btnTest)
+        btnBrowse = findViewById(R.id.btnBrowse)
         progress = findViewById(R.id.progress)
         status = findViewById(R.id.status)
 
@@ -60,7 +63,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         val s = getSharedPreferences("toastdesk.settings", Context.MODE_PRIVATE)
-        val savedProvider = s.getString("provider", "xAI (Grok)") ?: "xAI (Grok)"
+        val savedProvider = s.getString("provider", "OpenRouter") ?: "OpenRouter"
         val idx = PROVIDERS.indexOf(savedProvider)
         spProvider.setSelection(if (idx >= 0) idx else 0)
         baseUrl.setText(s.getString("baseUrl", "") ?: "")
@@ -86,6 +89,7 @@ class SettingsActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener { save(); status.text = "Saved." }
         btnTest.setOnClickListener { test() }
+        btnBrowse.setOnClickListener { browseFree() }
     }
 
     private fun applyPreset() {
@@ -137,5 +141,35 @@ class SettingsActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    private fun browseFree() {
+        if (!(spProvider.selectedItem?.toString() ?: "").startsWith("OpenRouter")) {
+            status.text = "The free-model list works with the OpenRouter provider only."
+            return
+        }
+        btnBrowse.isEnabled = false
+        progress.visibility = View.VISIBLE
+        status.text = "Loading free models..."
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val ids = withContext(Dispatchers.IO) { Api.freeOpenRouterModels() }
+                if (ids.isEmpty()) {
+                    status.text = "No free models listed right now."
+                } else {
+                    status.text = ""
+                    AlertDialog.Builder(this@SettingsActivity)
+                        .setTitle("Free models (" + ids.size + ")")
+                        .setItems(ids.toTypedArray()) { _, w -> model.setText(ids[w]) }
+                        .setNegativeButton("Close", null)
+                        .show()
+                }
+            } catch (e: Exception) {
+                status.text = "Couldn't load the list: ${e.message?.take(140) ?: e.javaClass.simpleName}"
+            } finally {
+                btnBrowse.isEnabled = true
+                progress.visibility = View.GONE
+            }
+        }
     }
 }

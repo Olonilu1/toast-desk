@@ -141,4 +141,21 @@ object Api {
         }
         throw ApiError(200, "The model returned an empty answer. Check the model name in Settings.")
     }
+
+    fun freeOpenRouterModels(): List<String> {
+        val req = Request.Builder().url("https://openrouter.ai/api/v1/models").build()
+        client.newCall(req).execute().use { resp ->
+            val text = resp.body?.string() ?: ""
+            if (!resp.isSuccessful) throw ApiError(resp.code, text.ifBlank { resp.message })
+            val j = JSONObject(text)
+            val arr = j.optJSONArray("data") ?: return emptyList()
+            val out = ArrayList<String>()
+            for (k in 0 until arr.length()) {
+                val o = arr.optJSONObject(k) ?: continue
+                val id = o.optString("id", "")
+                if (id.endsWith(":free")) out.add(id)
+            }
+            return out.sorted()
+        }
+    }
 }

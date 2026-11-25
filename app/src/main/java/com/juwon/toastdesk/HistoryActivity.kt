@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -92,6 +94,29 @@ class HistoryActivity : AppCompatActivity() {
         val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(ClipData.newPlainText("reply", text))
         Toast.makeText(this, "Copied.", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_history, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_clear_history -> {
+                AlertDialog.Builder(this)
+                    .setTitle("Clear history")
+                    .setMessage("Delete every saved session?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        HistoryStore.clear(this)
+                        reload()
+                    }
+                    .setNegativeButton("Keep", null)
+                    .show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -54,6 +54,12 @@
                 android:background="@drawable/bg_btn"
                 android:text="SAVE" android:textColor="@color/accentInk" android:textStyle="bold"/>
 
+            <Button android:id="@+id/btnBrowse"
+                android:layout_width="match_parent" android:layout_height="44dp"
+                android:layout_marginTop="2dp"
+                android:background="@null"
+                android:text="BROWSE FREE MODELS" android:textColor="@color/accent" android:textStyle="bold"/>
+
             <Button android:id="@+id/btnTest"
                 android:layout_width="match_parent" android:layout_height="44dp"
                 android:layout_marginTop="10dp"

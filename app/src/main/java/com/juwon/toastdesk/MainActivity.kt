@@ -23,18 +23,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var her: EditText
     private lateinit var notes: EditText
+    private lateinit var myDraft: EditText
     private lateinit var spTone: Spinner
     private lateinit var spLang: Spinner
     private lateinit var spStage: Spinner
     private lateinit var spGoal: Spinner
     private lateinit var spLen: Spinner
     private lateinit var btnGo: Button
+    private lateinit var btnClear: Button
     private lateinit var progress: ProgressBar
     private lateinit var status: TextView
     private lateinit var resultsBox: LinearLayout
@@ -69,12 +70,14 @@ class MainActivity : AppCompatActivity() {
 
         her = findViewById(R.id.her)
         notes = findViewById(R.id.notes)
+        myDraft = findViewById(R.id.myDraft)
         spTone = findViewById(R.id.spTone)
         spLang = findViewById(R.id.spLang)
         spStage = findViewById(R.id.spStage)
         spGoal = findViewById(R.id.spGoal)
         spLen = findViewById(R.id.spLen)
         btnGo = findViewById(R.id.btnGo)
+        btnClear = findViewById(R.id.btnClear)
         progress = findViewById(R.id.progress)
         status = findViewById(R.id.status)
         resultsBox = findViewById(R.id.resultsBox)
@@ -87,6 +90,7 @@ class MainActivity : AppCompatActivity() {
         loadPrefs()
 
         btnGo.setOnClickListener { generate() }
+        btnClear.setOnClickListener { clearAll() }
 
         val shared = intent?.getStringExtra(Intent.EXTRA_TEXT)
         if (!shared.isNullOrBlank()) {
@@ -128,10 +132,18 @@ class MainActivity : AppCompatActivity() {
     private fun settings(): Api.Settings {
         val s = getSharedPreferences("toastdesk.settings", Context.MODE_PRIVATE)
         return Api.Settings(
-            provider = s.getString("provider", "xAI (Grok)") ?: "xAI (Grok)",
+            provider = s.getString("provider", "OpenRouter") ?: "OpenRouter",
             baseUrl = s.getString("baseUrl", "") ?: "",
             model = s.getString("model", "") ?: "",
             apiKey = s.getString("apiKey", "") ?: "")
+    }
+
+    private fun clearAll() {
+        her.setText("")
+        notes.setText("")
+        myDraft.setText("")
+        resultsBox.removeAllViews()
+        status.text = ""
     }
 
     private fun systemPrompt(): String = """
@@ -143,13 +155,15 @@ class MainActivity : AppCompatActivity() {
         - Mirror her energy and length. Never sound more eager than she does.
         - Always be respectful: no pressure, guilt-tripping, put-downs, manipulation, or sexual content.
         - If she is not interested or the chat looks dead, say so honestly in the tip. Never manufacture hope.
+        - If he provides his own draft (WHAT HE WANTS TO SEND), respect what he wants to say: keep his meaning and intent, only polish the wording and delivery. Never replace his draft with something he did not say.
         - Follow the requested tone, language, stage, goal and length exactly.
-        - Vary the four replies so they are genuinely different strategies, not the same line reworded.
+        - Vary the replies so they are genuinely different strategies, not the same line reworded.
 
         OUTPUT FORMAT
         Return ONLY valid JSON, no markdown fences, no commentary, in this exact shape:
         {"replies":[{"label":"Warm","text":"...","why":"one short line on why it works"},{"label":"Playful","text":"...","why":"..."},{"label":"Smooth","text":"...","why":"..."},{"label":"Direct","text":"...","why":"..."}],"tip":"one practical tip for where to take the chat next"}
-        Exactly four replies. Each "text" is the message he would actually send. "why" is one short line.
+        Normally exactly four replies with those labels. If he provided his own draft, add a FIFTH reply labeled "His draft, polished" whose text is his draft improved (same meaning, better delivery).
+        Each "text" is the message he would actually send. "why" is one short line.
     """.trimIndent()
 
     private fun userPrompt(): String {
@@ -158,7 +172,8 @@ class MainActivity : AppCompatActivity() {
         val stage = spStage.selectedItem?.toString() ?: "Just started talking"
         val goal = spGoal.selectedItem?.toString() ?: "Keep the chat going"
         val len = spLen.selectedItem?.toString() ?: "Short"
-        val notes = notes.text.toString().trim().ifBlank { "none" }
+        val notesTxt = notes.text.toString().trim().ifBlank { "none" }
+        val draft = myDraft.text.toString().trim().ifBlank { "none" }
         val herText = her.text.toString().trim()
         return """
             TONE: $tone (${TONE_MEANING[tone] ?: ""})
@@ -166,7 +181,8 @@ class MainActivity : AppCompatActivity() {
             WHERE YOU TWO ARE: $stage
             WHAT YOU WANT: $goal
             LENGTH: $len. ${LEN_MEANING[len] ?: ""}
-            NOTES FROM HIM: $notes
+            NOTES FROM HIM: $notesTxt
+            WHAT HE WANTS TO SEND (his own draft, optional): $draft
 
             HER MESSAGE (may be a full chat export; act on the latest message from her):
             ---
@@ -190,6 +206,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnGo.isEnabled = false
+        btnClear.isEnabled = false
         progress.visibility = View.VISIBLE
         status.text = "Drafting..."
         resultsBox.removeAllViews()
@@ -209,6 +226,7 @@ class MainActivity : AppCompatActivity() {
                 status.text = "Failed: ${e.message ?: e.javaClass.simpleName}"
             } finally {
                 btnGo.isEnabled = true
+                btnClear.isEnabled = true
                 progress.visibility = View.GONE
             }
         }
@@ -231,6 +249,28 @@ class MainActivity : AppCompatActivity() {
             tv.textSize = 13f
             tv.setPadding(4, 18, 4, 8)
             resultsBox.addView(tv)
+        }
+        val regen = Button(this)
+        regen.text = "NEW BATCH"
+        regen.setTextColor(getColor(R.color.accent))
+        regen.background = null
+        regen.setOnClickListener { generate() }
+        resultsBox.addView(regen)
+        val wa = Button(this)
+        wa.text = "OPEN WHATSAPP"
+        wa.setTextColor(getColor(R.color.accent))
+        wa.background = null
+        wa.setOnClickListener { openWhatsApp() }
+        resultsBox.addView(wa)
+    }
+
+    private fun openWhatsApp() {
+        val intent = packageManager.getLaunchIntentForPackage("com.whatsapp")
+        if (intent != null) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "WhatsApp is not installed.", Toast.LENGTH_SHORT).show()
         }
     }
 
