@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+        android:background="@color/surface"
+        app:title="Toast Desk"
+        app:titleTextColor="@color/accent"/>
+
+    <ScrollView
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="HER MESSAGE" android:textColor="@color/dim" android:textSize="11sp"
+                android:letterSpacing="0.12" android:textAllCaps="true"/>
+            <EditText android:id="@+id/her"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minLines="4" android:gravity="top"
+                android:background="@drawable/bg_edit" android:padding="12dp"
+                android:hint="Paste what she sent, or the whole chat export"
+                android:textColorHint="@color/dim" android:textColor="@color/fg"
+                android:inputType="textMultiLine|textCapSentences"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" android:text="TONE" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <Spinner android:id="@+id/spTone" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_edit" android:padding="4dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:text="LANGUAGE" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <Spinner android:id="@+id/spLang" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_edit" android:padding="4dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:text="WHERE YOU TWO ARE" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <Spinner android:id="@+id/spStage" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_edit" android:padding="4dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:text="WHAT YOU WANT" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <Spinner android:id="@+id/spGoal" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_edit" android:padding="4dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:text="LENGTH" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <Spinner android:id="@+id/spLen" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_edit" android:padding="4dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:text="NOTES (OPTIONAL)" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <EditText android:id="@+id/notes"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minLines="2" android:gravity="top"
+                android:background="@drawable/bg_edit" android:padding="12dp"
+                android:hint="Anything she should not forget, or anything to avoid"
+                android:textColorHint="@color/dim" android:textColor="@color/fg"
+                android:inputType="textMultiLine|textCapSentences"/>
+
+            <Button android:id="@+id/btnGo"
+                android:layout_width="match_parent" android:layout_height="52dp"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/bg_btn"
+                android:text="GET REPLIES" android:textColor="@color/accentInk"
+                android:textStyle="bold" android:letterSpacing="0.08"/>
+
+            <ProgressBar android:id="@+id/progress"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" android:layout_marginTop="14dp"
+                android:visibility="gone"/>
+
+            <TextView android:id="@+id/status"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" android:textColor="@color/dim" android:textSize="13sp"/>
+
+            <LinearLayout android:id="@+id/resultsBox"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginTop="8dp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

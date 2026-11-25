@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+        android:background="@color/surface"
+        app:title="Model and API key"
+        app:titleTextColor="@color/accent"/>
+
+    <ScrollView
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="PROVIDER" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <Spinner android:id="@+id/spProvider"
+                android:layout_width="match_parent" android:layout_height="48dp"
+                android:background="@drawable/bg_edit" android:padding="4dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="14dp" android:text="API BASE URL" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <EditText android:id="@+id/baseUrl"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:background="@drawable/bg_edit" android:padding="12dp"
+                android:hint="https://api.x.ai/v1" android:textColorHint="@color/dim"
+                android:textColor="@color/fg" android:inputType="textUri"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="14dp" android:text="MODEL NAME" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <EditText android:id="@+id/model"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:background="@drawable/bg_edit" android:padding="12dp"
+                android:hint="grok-4" android:textColorHint="@color/dim"
+                android:textColor="@color/fg" android:inputType="text"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="14dp" android:text="API KEY" android:textColor="@color/dim" android:textSize="11sp" android:textAllCaps="true"/>
+            <EditText android:id="@+id/apiKey"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:background="@drawable/bg_edit" android:padding="12dp"
+                android:hint="paste your key" android:textColorHint="@color/dim"
+                android:textColor="@color/fg" android:inputType="textPassword"/>
+
+            <Button android:id="@+id/btnSave"
+                android:layout_width="match_parent" android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_btn"
+                android:text="SAVE" android:textColor="@color/accentInk" android:textStyle="bold"/>
+
+            <Button android:id="@+id/btnTest"
+                android:layout_width="match_parent" android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:background="@null"
+                android:text="TEST CONNECTION" android:textColor="@color/accent" android:textStyle="bold"/>
+
+            <ProgressBar android:id="@+id/progress"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" android:layout_marginTop="10dp"
+                android:visibility="gone"/>
+
+            <TextView android:id="@+id/status"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:textColor="@color/dim" android:textSize="13sp"/>
+
+            <TextView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="Your key stays on this phone. It is sent only to the provider you picked."
+                android:textColor="@color/dim" android:textSize="12sp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
