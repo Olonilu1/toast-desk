@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var spLen: Spinner
     private lateinit var btnGo: Button
     private lateinit var btnClear: Button
+    private lateinit var btnCatch: Button
     private lateinit var progress: ProgressBar
     private lateinit var status: TextView
     private lateinit var resultsBox: LinearLayout
@@ -78,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         spLen = findViewById(R.id.spLen)
         btnGo = findViewById(R.id.btnGo)
         btnClear = findViewById(R.id.btnClear)
+        btnCatch = findViewById(R.id.btnCatch)
         progress = findViewById(R.id.progress)
         status = findViewById(R.id.status)
         resultsBox = findViewById(R.id.resultsBox)
@@ -91,12 +94,36 @@ class MainActivity : AppCompatActivity() {
 
         btnGo.setOnClickListener { generate() }
         btnClear.setOnClickListener { clearAll() }
+        btnCatch.setOnClickListener { startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
 
         val shared = intent?.getStringExtra(Intent.EXTRA_TEXT)
         if (!shared.isNullOrBlank()) {
             her.setText(shared)
             status.text = "Loaded from the share sheet. Check the options, then get replies."
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadCaught()
+        btnCatch.visibility = if (listenerEnabled()) View.GONE else View.VISIBLE
+    }
+
+    private fun listenerEnabled(): Boolean {
+        val s = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: return false
+        return s.contains(packageName)
+    }
+
+    private fun loadCaught() {
+        val p = getSharedPreferences("toastdesk.catcher", Context.MODE_PRIVATE)
+        if (!p.getBoolean("pending", false)) return
+        p.edit().putBoolean("pending", false).apply()
+        val body = p.getString("last", "") ?: return
+        if (body.isBlank()) return
+        val title = p.getString("lastTitle", "") ?: ""
+        val full = if (title.isNotBlank() && !body.startsWith("$title:")) "$title:\n$body" else body
+        her.setText(full)
+        status.text = "Loaded automatically from WhatsApp. Check the options, then get replies."
     }
 
     private fun fill(sp: Spinner, items: Array<String>) {
